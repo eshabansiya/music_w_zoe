@@ -70,7 +70,7 @@ def nearest():
     neighbor_indices = indices[0]
 
     # Exclude the query song itself if you don’t want it in the list
-    neighbor_songs = df_orig.iloc[neighbor_indices]["track_name"].values
+    neighbor_songs = df_orig.iloc[neighbor_indices]["track_name"].tolist()
 
     print("Recommended similar songs:", neighbor_songs)
     return jsonify({

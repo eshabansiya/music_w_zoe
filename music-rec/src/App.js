@@ -5,6 +5,7 @@ function App() {
   const [song, setSong] = useState('');
   const [artist, setArtist] = useState('');
   const [accuracy, setAccuracy] = useState(null);
+  const [reccomendations, setReccomendations] = useState(null);
   const [report, setReport] = useState(null);
 
   const handleClassify = () => {
@@ -15,6 +16,17 @@ function App() {
       .then(data => {
         setAccuracy(data.accuracy);
         setReport(data.report);
+      })
+      .catch(err => console.error(err));
+  };
+
+  const handleNearest = () => {
+    // You could pass song and artist to your backend here
+    // For now, just fetch as before
+    fetch("http://127.0.0.1:5000/api/nearest")
+      .then(res => res.json())
+      .then(data => {
+        setReccomendations(data.songs);
       })
       .catch(err => console.error(err));
   };
@@ -38,13 +50,12 @@ function App() {
             onChange={(e) => setArtist(e.target.value)}
           />
           <button onClick={handleClassify}>Classify Genre</button>
+          <button onClick={handleNearest}>Nearest Songs</button>
         </div>
 
         {accuracy !== null ? (
           <div className="results">
-            <p><strong>Accuracy:</strong> {(accuracy * 100).toFixed(2)}%</p>
-            <h3>Classification Report</h3>
-            <pre>{JSON.stringify(report, null, 2)}</pre>
+            <p><strong>Accuracy:</strong> {reccomendations}</p>
           </div>
         ) : (
           <p>Enter a song and artist to be reccomended five songs!</p>
