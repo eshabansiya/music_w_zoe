@@ -3,7 +3,7 @@ from flask_cors import CORS
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.metrics import accuracy_score, classification_report
 
 app = Flask(__name__)
@@ -55,6 +55,28 @@ def classify():
         "accuracy": accuracy,
         "report": report
     })
+@app.route("/api/nearest", methods=["GET"])
+def nearest():
+    df_numeric = df_orig[audio_features]
+    # Create the model: here using Euclidean distance
+    nn = NearestNeighbors(n_neighbors=3, metric='euclidean')
+    # Fit the model
+    nn.fit(df_numeric)
+    query_song = df_orig[df_orig["track_name"] == "Don’t Blame Me"][audio_features]
+
+    # Find the 3 nearest neighbors of the query point
+    distances, indices = nn.kneighbors(query_song)
+    # indices is a 2D array, so flatten it
+    neighbor_indices = indices[0]
+
+    # Exclude the query song itself if you don’t want it in the list
+    neighbor_songs = df_orig.iloc[neighbor_indices]["track_name"].values
+
+    print("Recommended similar songs:", neighbor_songs)
+    return jsonify({
+        "songs": neighbor_songs
+    })
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
